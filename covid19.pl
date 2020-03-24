@@ -512,7 +512,7 @@ sub readyToAdd{
 		print `git  push -u origin branch-$config{currentweek}`;
 		print "Now time to create a pull request.  Browser should open\n".
 		      "and you should see a button to create pull request...\n";
-		browse2("https://github.com/login?return_to=%2F$config{githubUN}%2Fperlweeklychallenge-club");
+		browse2("https://github.com/login?return_to=%2F$config{githubUN}%2F$config{repoName}");
 	}
 }
 

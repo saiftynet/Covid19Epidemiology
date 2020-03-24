@@ -6,12 +6,12 @@ use LWP::Simple qw($ua get head getstore);
 use Cwd qw(getcwd);
 use Term::ANSIColor;
 
-my $VERSION=0.01;
+my $VERSION=0.02;
 
 print color('bold green'),"Starting Covid19 Epidemiology Shell $VERSION\n",color('reset');
 # version notes
 print color('bold yellow'),<<ENDMSG;
-Version 0.01 
+Version $VERSION 
 
 Entering  '!' at any prompt allows you to submit an issue.
 ENDMSG
@@ -46,11 +46,8 @@ setupGithub2();          # step 5 try and set up github credentials (issue raise
 addUpstream();           # step 6 ensure upstream has been set up 
 fetchUpstream();         # step 7 fetch upstream
 getBranches();           # step 8 get branches, and set one up for this week if required
-getChallenges();         # step 9 get challenges from manwar's PWC blog
-
 viewCodeTestCycle();     # step 10 view tasks, edit code, test the code unitl you are finished
 
-readyToAdd();            # step 12 ready to add
 saveConfig();	
 print color('bold green'),"\n\nAll done...good bye!!\n",color('reset');
 exit 0;
@@ -261,7 +258,30 @@ sub getBranches{
 	print "Remote Branches found : -",join ", ",@matches;
 	my $abr=`git branch`;
 	$abr=~s/\s+/ /gm;
-	print "\nBranches found : - $abr\n";
+	$abr=~s/\* master//gm;
+	my @branches=split " ",$abr;
+	if (@branches){
+		print "\n",scalar @branches, " branches found : - \n", join "\n",@branches,"\n";
+		$config{currentBranch}=$branches[0] unless $config{currentBranch};
+		my $response=prompt("Do you wish to create a new branch, or work on the existing branch(es)\n".
+		                    "Default branch is '$config{currentBranch}'",
+	                   ["Create new branch",map{$_ eq $config{currentBranch}?"$_ *":$_} @branches]) // $config{currentBranch};
+	    if ($response=~/Create new/){
+			my $newBranch=prompt("neter new branch name");
+			print `git checkout -b $newBranch`;
+			$config{currentBranch}="$newBranch";
+		}
+		else{
+			print `git checkout $response`;
+		}
+	}
+	else {
+		print "\nNo branches found creating Unstable\n";
+		print `git checkout -b Unstable`;
+		$config{currentBranch}="Unstable";
+	}
+	
+	
 	
 	#my $week   = findItem("http://perlweeklychallenge.org",qr/perl-weekly-challenge-(\d+)/m);
 	#unless ((exists $config{currentweek})&&($config{currentweek} eq $week)){
@@ -286,7 +306,7 @@ sub getBranches{
 }
 
 
-sub getChallenges{   # extracts week number from index page,
+sub getTasks{   # extracts week number from index page,
 	#print "\nGetting challenges\n";
 	#$config{task1}  = stripWrap(       # extracts tasks and stores them
 					  #findItem("http://perlweeklychallenge.org/blog/perl-weekly-challenge-$config{currentweek}",
@@ -307,6 +327,7 @@ sub viewCodeTestCycle{
 		readyToCode()  if $response =~ /Edit/;
 		readyToTest()  if $response =~ /Test/;
 	}
+	readyToAdd();            
 };
 
 sub viewTasks{
@@ -474,26 +495,25 @@ sub comment{
 }
 
 sub readyToAdd{
-	#my $response=prompt ("\n\nIf you have added your responses to the folder and\n".
-	      #"you have tested them finally to your satisfaction \n".
-	      #"you can commit the answers - press 'y' if ready.\n".
-	      #"If you are not ready, just press 'n' and come back next time.\n\n".
-	      #"Are you ready to commit your changes? (y/n)");
-	#if ($response =~/y/i){
-		#print "Adding current week's ($config{currentweek}) challenges...\n";
-		#my $dirName=$config{pwcUN}?$config{pwcUN}:$config{githubUN};  # some PWC usernames do not match GH usernames
-		#print `git add challenge-$config{currentweek}/$dirName`;
-		#print "Commiting changes...\n";
-		#my $message="Challenge-$config{currentweek} solutions by $dirName";
-		#$response=prompt("Default message is:\n".color("green").$message.color("red")."\nPress Enter to select, or enter new message\n");
-		#$message=$response if $response=~/\w/;
-		#print `git commit --author=$config{githubUN} --message="$message"`;
-		#print "Pushing results to your github...\n";
-		#print `git  push -u origin branch-$config{currentweek}`;
-		#print "Now time to create a pull request.  Browser should open\n".
-		      #"and you should see a button to create pull request...\n";
-		#browse2("https://github.com/login?return_to=%2F$config{githubUN}%2Fperlweeklychallenge-club");
-	#}
+	my $response=prompt ("\n\nIf you have added your responses to the folder and\n".
+	      "you have tested them finally to your satisfaction \n".
+	      "you can commit the answers - press 'y' if ready.\n".
+	      "If you are not ready, just press 'n' and come back next time.\n\n".
+	      "Are you ready to commit your changes? (y/n)");
+	if ($response =~/y/i){
+		print "Adding current week's ($config{currentweek}) challenges...\n";
+		print `git add --all`;
+		print "Commiting changes to scripts...\n";
+		my $message="Updates suggested by $config{githubUN}";
+		$response=prompt("Default message is:\n".color("green").$message.color("red")."\nPress Enter to select, or enter new message\n");
+		$message=$response if $response=~/\w/;
+		print `git commit --author=$config{githubUN} --message="$message"`;
+		print "Pushing results to your github...\n";
+		print `git  push -u origin branch-$config{currentweek}`;
+		print "Now time to create a pull request.  Browser should open\n".
+		      "and you should see a button to create pull request...\n";
+		browse2("https://github.com/login?return_to=%2F$config{githubUN}%2Fperlweeklychallenge-club");
+	}
 }
 
 sub clearScreen{ # https://www.perlmonks.org/?node_id=18774

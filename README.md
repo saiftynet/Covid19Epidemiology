@@ -1,5 +1,9 @@
 # Covid19Epidemiology
 
-John Hopkins has collected data for COVID-19 cases to be used for general public consumption and analysis. This code aims to allow the data to be used in Perl applications to observe data points, display trends graphically and perform statistical anaylysis.
+John Hopkins has collected data for COVID-19 cases to be used for general public consumption and analysis.  Other data sets also exist.  The purpose of these set of scripts, developed using experience from the PerlWeeklyChallenge and EZPWC, is to allow collaborative development of such tools mainly in Perl.  The shell  eases the processes required to fork this repository,  create a local clone and then manages the development of scripts and modules, as well as keeping the data they generate. 
 
-The importer script is developed using experience from EZPWC, creates a local clone of the John Hopkins repo, converts the data into simple hashes and stores them locally. This hash is then used by other scripts to generate tables and charts or transform the data into other formats (e.g. for embedding or use in other tools).
+The workflow is in development, and it has to be noted that there are already similar much more advanced collaborative efforts elsewhere. It is however possible that others may find the work here useful, or may wish to contribute.
+
+
+
+

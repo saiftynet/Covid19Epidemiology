@@ -257,8 +257,9 @@ sub getBranches{
 	my @matches = grep ($_ !~/HEAD|master/,($br =~ /origin\/([^\s\n]+)/mg) );
 	print "Remote Branches found : -",join ", ",@matches;
 	my $abr=`git branch`;
+	$abr=~s/\*|master//gm;
 	$abr=~s/\s+/ /gm;
-	$abr=~s/\* master//gm;
+	
 	my @branches=split " ",$abr;
 	if (@branches){
 		print "\n",scalar @branches, " branches found : - \n", join "\n",@branches,"\n";
@@ -501,7 +502,7 @@ sub readyToAdd{
 	      "If you are not ready, just press 'n' and come back next time.\n\n".
 	      "Are you ready to commit your changes? (y/n)");
 	if ($response =~/y/i){
-		print "Adding current week's ($config{currentweek}) challenges...\n";
+		print "Adding $config{currentBrannch}...\n";
 		print `git add --all`;
 		print "Commiting changes to scripts...\n";
 		my $message="Updates suggested by $config{githubUN}";
@@ -509,7 +510,7 @@ sub readyToAdd{
 		$message=$response if $response=~/\w/;
 		print `git commit --author=$config{githubUN} --message="$message"`;
 		print "Pushing results to your github...\n";
-		print `git  push -u origin branch-$config{currentweek}`;
+		print `git  push -u origin $config{currentBranch}`;
 		print "Now time to create a pull request.  Browser should open\n".
 		      "and you should see a button to create pull request...\n";
 		browse2("https://github.com/login?return_to=%2F$config{githubUN}%2F$config{repoName}");

@@ -44,7 +44,7 @@ makeFork();              # step 3 set up fork if not already forked
 clone();                 # step 4 clone if not already cloned
 setupGithub2();          # step 5 try and set up github credentials (issue raised by cpritchett)
 addUpstream();           # step 6 ensure upstream has been set up 
-fetchUpstream();         # step 7 fetch upstream
+#fetchUpstream();         # step 7 fetch upstream
 getBranches();           # step 8 get branches, and set one up for this week if required
 viewCodeTestCycle();     # step 10 view tasks, edit code, test the code unitl you are finished
 
@@ -204,6 +204,7 @@ sub setupGithub2{
 }
 
 sub addUpstream{
+	return if($config{githubUN} eq $config{repoOwner});  # no need to if this is ahead of the game
 	print "Checking out master\n";
 	chdir "$config{workingDirectory}".$directorySeparator."$config{repoName}";
 	`git checkout master`;
@@ -224,6 +225,7 @@ sub addUpstream{
 		 print "Upstream not added\n" ; 
 		}
 	}
+	fetchUpstream();
 }
 	
 sub fetchUpstream{
@@ -502,7 +504,7 @@ sub readyToAdd{
 	      "If you are not ready, just press 'n' and come back next time.\n\n".
 	      "Are you ready to commit your changes? (y/n)");
 	if ($response =~/y/i){
-		print "Adding $config{currentBrannch}...\n";
+		print "Adding $config{currentBranch}...\n";
 		print `git add --all`;
 		print "Commiting changes to scripts...\n";
 		my $message="Updates suggested by $config{githubUN}";

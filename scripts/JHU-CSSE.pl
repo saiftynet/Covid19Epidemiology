@@ -7,8 +7,6 @@
 This application creates a clone of the COVID-19 dataset at the CSSE
 of John Hopkins University. It updates the clone if one already exists.
 It converts the dataset to Storable, JSON and Data::Dumper files.
-If called with a parameter it can extract specific rows of data
-
 =cut
  
 use strict; use warnings;
